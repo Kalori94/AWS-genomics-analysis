@@ -1,0 +1,41 @@
+#ANALIZANDO UNA SECUENCIA EN AMAZON EC2
+#ANÁLISIS FASTQC
+#Para encontrar tus archivos descargados si volviste a iniciar sesión
+sudo -i
+ls
+
+#Activar conda
+conda init
+conda activate bio-tools
+
+#Si no se ha creado el espacio de bio-tools, crearlo 
+#Instalar fastqc si no se tiene instalado
+conda install -c bioconda fastqc
+
+#### 1. Si el archivo tiene la extensión .sra, utilizar fasterqdump para descomprimirlo y obtener los archivos fastq
+fasterq-dump --split-files SRR5368359.sra  #sustituye aquí por tu archivo SRR
+#Verificar
+ls
+
+##### 2. Ejecutar FASTQC
+#Crear un directorio para los resultados que se llame fastqc_results
+mkdir fastqc_results
+# Analiza el archivo de reads 1
+fastqc SRR5368359_1.fastq -o fastqc_results -t 4
+
+# Analiza el archivo de reads 2 (si aplica)
+fastqc SRR5368359_2.fastq -o fastqc_results -t 4
+
+
+
+#Visualizar el html de los resultados
+#Si se utilizó SSH
+scp -i /ruta/a/tu/clave.pem usuario@ip-publica.o.dns:/ruta/absoluta/a/SRR5368359_1_fastqc.html .
+#Ya que se haya descargado, hace clic en el archivo html en tu computadora
+
+#Si tienes muchos archivos entonces utilizar MULTIQC
+conda install -c bioconda multiqc
+# Asegúrate de estar en el directorio que contiene 'fastqc_results'
+multiqc fastqc_results/
+
+##SI NO SE PUEDE DESCARGAR EL HTML, VERIFICAR EL PROTOCOLO DE SEGURIDAD QUE SE SELECCIONÓ PARA LA INSTANCIA Y REVISAR CÓDIGO PARA OBTENER EL HTML
