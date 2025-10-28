@@ -1,0 +1,92 @@
+##CREAR UNA ISNTANCIA ECL2 EN AWS, una vez dentro, comenzar la instalación de SRA ToolsKit
+
+##ANTES DE, VERIFICAR E INSTALAR LAS SIGUIENTES LIBRERÍAS
+##Si en AWS EC2 no aparecen los comandos sudo, apt, entonces ejecutar lo siguiente 
+wget http://security.ubuntu.com/ubuntu/pool/main/a/apt/
+
+##Buscar que sistema está usando AWS, identificar el nombre que aparece en el campo "NAME" después de correr el siguiente comando 
+cat /etc/os-release
+
+##SI DICE AMAZON LINUX Instalar la siguiente librería que contiene comandos antiguos para no tener problemas al ejecutar bioconda
+sudo yum install -y libxcrypt-compat
+
+##INSTALANDO CONDA
+##Si se usa AMAZON LINUX, entonces hay que instalar CONDA porque SRA-TOOLS no está en el paquete de softwares de AMAZON LINUX
+# Descarga el instalador
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+# Ejecuta el instalador (acepta los términos y la ubicación por defecto)
+bash Miniconda3-latest-Linux-x86_64.sh
+
+# Cierra y vuelve a abrir tu terminal, o activa la nueva configuración
+source ~/.bashrc
+
+#Hay que permitir que la terminal actualize automáticamente cuando se inicie conda. Al final responder YES
+#Si pusiste no 
+eval "$(/root/miniconda3/bin/conda shell.bash hook)"
+conda init bash
+
+#Instalar SRA TOOLS KIT
+conda create -n bio-tools
+#Aceptar instalación paquetes
+#Activar conda
+conda activate bio-tools
+#Instalar SRA-TOOLS
+conda install -c bioconda sra-tools ca-certificates
+
+##Correr un SRA de prueba
+fasterq-dump SRR5368359
+
+
+##SI esto falla es porque hay un problema con la conexión de la instancia de amazon EC2 a NCBI, para resolverlo debemos desactivar conda
+conda deactivate
+
+##PASO 1. LIMPIAR Y DESCARGAR la Versión 3.1.0
+##1. Desactiva Conda para que el sistema use la nueva herramienta
+conda deactivate
+
+##Tu prompt debería cambiar de (base) a [root@...]
+
+##2. Ve a tu directorio principal
+cd ~
+
+##3. Descarga la versión 3.1.0 (compatible con Amazon/CentOS Linux)
+wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.1.0/sratoolkit.3.1.0-centos_linux64.tar.gz
+
+##4. Descomprime el archivo
+tar -vxzf sratoolkit.3.1.0-centos_linux64.tar.gz
+
+##5. Elimina el archivo comprimido para limpiar
+rm sratoolkit.3.1.0-centos_linux64.tar.gz
+
+##PASO 2. Configurar la ruta (PATH)
+# 1. Agrega la nueva ruta al archivo de configuración de tu shell (cambiar ruta a tu ruta si es necesario)
+echo 'export PATH=$PATH:/root/sratoolkit.3.1.0-centos_linux64/bin' >> ~/.bashrc
+
+# 2. Carga los cambios de configuración
+source ~/.bashrc
+
+#PASO 3. Ejectuar directamente el binario 
+/root/sratoolkit.3.1.0-centos_linux64/bin/vdb-config -i
+
+###(Si esta versión funciona, ahora deberías poder ver las opciones de Red (Network))
+#Presiona N para ir a la sección "Network".
+#Busca y desmarca la casilla [X] Enable Remote Access.
+#Presiona S para Guardar (Save).
+#Presiona X para Salir (Exit).
+
+#Ejectuar fasterq-dump 
+/root/sratoolkit.3.1.0-centos_linux64/bin/fasterq-dump SRR5368359
+
+##Si hubo fallo probar con
+/root/sratoolkit.3.1.0-centos_linux64/bin/prefetch SRR5368359
+
+##Una vez que prefetch termine, el archivo SRA ya estará en tu instancia. Ahora, usa fasterq-dump para convertirlo a FASTQ, leyendo el archivo localmente.
+/root/sratoolkit.3.1.0-centos_linux64/bin/fasterq-dump SRR5368359
+
+##Verificar que se haya descargado SRR5368359
+ls 
+
+##Si saliste o actualizaste, ubica tus archivos intentando esto 
+sudo -i
+ls
