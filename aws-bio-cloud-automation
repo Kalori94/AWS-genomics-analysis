@@ -1,0 +1,36 @@
+#Si estás en terminal, antes  instalar dependencias python y AWS -> 
+# 1.pip install boto3 biopython pandas
+# 2.instalar la consola de amazon en: 
+# 3.https://github.com/aws/aws-cli/tree/v2?tab=readme-ov-file#installation  link directo a descargar AWS en sistema operativo
+## https://aws.amazon.com/es/cli/ ##Link a amazon para conocer sobre la terminal CLI
+# 4. Completar la autenticación poniendo las credenciales de amazon -> aws configure
+
+import boto3
+import os
+
+#Iniciar instancia S3 Bucket
+s3 = boto3.client('s3')
+#Variables
+BUCKET_NAME = "genomics-data-klr"
+##Sustituir aquí por el nombre del archivo que se desea subir
+DATA_FILE = "SRR8187488.fasta"
+
+#Función para subir el archivo
+def upload_file():
+    s3.upload_file(DATA_FILE, BUCKET_NAME, DATA_FILE )
+    print(f"Archivo {DATA_FILE} subido a {BUCKET_NAME}")
+
+#Función para enlistar los archivos
+def list_file():
+    response = s3.list_objects_v2(Bucket = BUCKET_NAME)
+    for obj in response.get('contents', []):
+        print(f"{obj['Key']} - {obj['Size']} bytes")
+
+#Función para eliminar algún archivo
+def delete_file():
+    s3.delete_object(Bucket = BUCKET_NAME, Key = file_name)
+    print(f" Archivo {file_name} eliminado")
+
+if __name__ == "__main__":
+    upload_file()
+    list_file()
